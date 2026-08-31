@@ -2,97 +2,74 @@
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">Data Kategori</h2>
 </x-slot>
 
-<div class="py-6">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 bg-white border-b border-gray-200">
-                
-                <div class="flex justify-between items-center mb-4">
-                    <input type="text" wire:model.live="search" placeholder="Cari kategori..." class="w-1/3 rounded-md border-gray-300 shadow-sm focus:border-[#1557A6] focus:ring focus:ring-[#1557A6] focus:ring-opacity-50">
-                    <button wire:click="create" class="px-4 py-2 bg-[#1557A6] text-white rounded hover:bg-blue-800 transition">
-                        Tambah Kategori
-                    </button>
-                </div>
+<div>
+    <x-taspen-page-header title="Kategori Barang" description="Kelola daftar kategori persediaan dan inventaris.">
+        <x-slot name="actions">
+            <x-taspen-button variant="primary" icon="plus" wire:click="create">Tambah Kategori</x-taspen-button>
+        </x-slot>
+    </x-taspen-page-header>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full whitespace-no-wrap">
-                        <thead>
-                            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-                                <th class="px-4 py-3">Nama</th>
-                                <th class="px-4 py-3">Deskripsi</th>
-                                <th class="px-4 py-3 w-32">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y">
-                            @foreach($categories as $category)
-                            <tr class="text-gray-700">
-                                <td class="px-4 py-3">{{ $category->name }}</td>
-                                <td class="px-4 py-3">{{ $category->description }}</td>
-                                <td class="px-4 py-3 flex space-x-2">
-                                    <button wire:click="edit({{ $category->id }})" class="text-blue-600 hover:text-blue-900">
-                                        <x-lucide-pencil class="w-4 h-4" />
-                                    </button>
-                                        @if(Auth::user()->role === 'admin')
-                                        <button wire:click="delete({{ $category->id }})" onclick="confirm('Yakin ingin menghapus?') || event.stopImmediatePropagation()" class="text-red-500 hover:text-red-700 ml-3">
-                                            <x-lucide-trash-2 class="w-4 h-4" />
-                                        </button>
-                                        @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                            @if($categories->isEmpty())
-                            <tr>
-                                <td colspan="3" class="px-4 py-8 text-center text-gray-500">Tidak ada data ditemukan.</td>
-                            </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="mt-4">
-                    {{ $categories->links() }}
-                </div>
-
-            </div>
+    <x-taspen-card noPadding="true">
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white">
+            <input type="text" wire:model.live="search" placeholder="Cari kategori..." class="w-full md:w-1/3 rounded-md border-gray-300 shadow-sm focus:border-[#1557A6] focus:ring focus:ring-[#1557A6] focus:ring-opacity-50 text-sm">
         </div>
-    </div>
+        
+        <x-taspen-table :headers="['Nama', 'Deskripsi', 'Aksi']">
+            @forelse($categories as $category)
+                <tr class="hover:bg-gray-50 transition-colors text-gray-700">
+                    <td class="px-6 py-4 font-medium">{{ $category->name }}</td>
+                    <td class="px-6 py-4">{{ $category->description ?? '-' }}</td>
+                    <td class="px-6 py-4 flex space-x-2">
+                        <button wire:click="edit({{ $category->id }})" class="p-1 text-blue-600 hover:text-blue-900 rounded hover:bg-blue-50 transition-colors" title="Edit">
+                            <x-lucide-pencil class="w-4 h-4" />
+                        </button>
+                        @if(Auth::user()->role === 'admin')
+                        <button wire:click="delete({{ $category->id }})" onclick="confirm('Yakin ingin menghapus?') || event.stopImmediatePropagation()" class="p-1 text-red-600 hover:text-red-900 rounded hover:bg-red-50 transition-colors" title="Hapus">
+                            <x-lucide-trash-2 class="w-4 h-4" />
+                        </button>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="3" class="p-0">
+                        <x-taspen-empty-state icon="tags" title="Belum ada data kategori" description="Belum ada kategori yang tercatat dalam sistem.">
+                            <x-slot name="action">
+                                <x-taspen-button variant="ghost" icon="plus" wire:click="create">Tambah Kategori</x-taspen-button>
+                            </x-slot>
+                        </x-taspen-empty-state>
+                    </td>
+                </tr>
+            @endforelse
+        </x-taspen-table>
+        
+        @if($categories->hasPages())
+        <div class="p-4 border-t border-gray-100 bg-white">
+            {{ $categories->links() }}
+        </div>
+        @endif
+    </x-taspen-card>
 
     <!-- Form Modal -->
-    @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg w-1/3 p-6">
-            <h2 class="text-lg font-bold mb-4">{{ $categoryId ? 'Edit Kategori' : 'Tambah Kategori' }}</h2>
-            <form wire:submit.prevent="store">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Nama Kategori</label>
-                    <input type="text" wire:model="name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1557A6] focus:ring focus:ring-[#1557A6] focus:ring-opacity-50">
-                    @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi</label>
-                    <textarea wire:model="description" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1557A6] focus:ring focus:ring-[#1557A6] focus:ring-opacity-50"></textarea>
-                    @error('description') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div>
-                <div class="flex justify-end space-x-2 mt-6">
-                    <button type="button" wire:click="closeModal" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-[#1557A6] text-white rounded hover:bg-blue-800">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @endif
-
-    <!-- Delete Confirmation Modal -->
-    @if($isDeleteModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg w-1/3 p-6">
-            <h2 class="text-lg font-bold mb-4 text-red-600">Konfirmasi Hapus</h2>
-            <p>Apakah Anda yakin ingin menghapus kategori ini? Semua barang terkait mungkin akan terpengaruh.</p>
-            <div class="flex justify-end space-x-2 mt-6">
-                <button type="button" wire:click="$set('isDeleteModalOpen', false)" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Batal</button>
-                <button type="button" wire:click="delete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800">Hapus</button>
+    <x-taspen-modal :isOpen="$isModalOpen" title="{{ $categoryId ? 'Edit Kategori' : 'Tambah Kategori' }}">
+        <x-slot name="closeAction">wire:click="closeModal"</x-slot>
+        
+        <form wire:submit.prevent="store" id="categoryForm">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-semibold mb-2">Nama Kategori</label>
+                <input type="text" wire:model="name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1557A6] focus:ring focus:ring-[#1557A6] focus:ring-opacity-50 sm:text-sm">
+                @error('name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
             </div>
-        </div>
-    </div>
-    @endif
+            <div class="mb-2">
+                <label class="block text-gray-700 text-sm font-semibold mb-2">Deskripsi</label>
+                <textarea wire:model="description" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#1557A6] focus:ring focus:ring-[#1557A6] focus:ring-opacity-50 sm:text-sm"></textarea>
+                @error('description') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+            </div>
+        </form>
+        
+        <x-slot name="footer">
+            <x-taspen-button variant="secondary" wire:click="closeModal">Batal</x-taspen-button>
+            <x-taspen-button variant="primary" type="submit" form="categoryForm" loadingTarget="store">Simpan</x-taspen-button>
+        </x-slot>
+    </x-taspen-modal>
 </div>

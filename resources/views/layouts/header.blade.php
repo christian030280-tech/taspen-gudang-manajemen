@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-10 bg-white border-b border-gray-200">
+<header class="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
     <div class="flex items-center justify-between px-6 py-4">
         <div class="flex items-center">
             @if (isset($header))

@@ -38,8 +38,8 @@ class Dashboard extends Component
             ->take(5)
             ->get();
 
-        // Recent Activity
-        $recentActivities = \App\Models\ActivityLog::with('user')
+        // Recent Activity (Use ItemTransaction instead of ActivityLog)
+        $recentActivities = ItemTransaction::with(['user', 'item'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();

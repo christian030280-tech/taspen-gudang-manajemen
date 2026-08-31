@@ -21,6 +21,15 @@ class ItemOut extends Component
         'description' => 'nullable|string',
     ];
 
+    protected $messages = [
+        'item_id.required' => 'Barang wajib dipilih.',
+        'quantity.required' => 'Jumlah barang wajib diisi.',
+        'quantity.integer' => 'Jumlah barang harus berupa angka.',
+        'quantity.min' => 'Jumlah barang minimal 1.',
+        'transaction_date.required' => 'Tanggal transaksi wajib diisi.',
+        'source_or_recipient.required' => 'Penerima / Pegawai wajib diisi.',
+    ];
+
     public function mount()
     {
         $this->transaction_date = now()->format('Y-m-d');
